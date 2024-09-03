@@ -1,10 +1,11 @@
 # zellular.py
 
-a python sdk for zellular
+A Python SDK for interacting with the Zellular network.
 
 ## Dependencies
 
-It required to [MCL](https://github.com/herumi/mcl) native package to be installed.
+To use zelluar.py, you'll need to install the [MCL](https://github.com/herumi/mcl) native library. Follow these steps to install it:
+
 ```
 $ sudo apt install libgmp3-dev
 $ wget https://github.com/herumi/mcl/archive/refs/tags/v1.93.zip
@@ -19,19 +20,28 @@ $ make install
 
 ## Installation
 
+Install the zelluar.py package via pip:
+
 ```
 pip install zellular
 ```
 
-## Example
+## Usage
 
 ### Getting Nodes
 
+Zellular Testnet is deployed on the EigenLayer Holesky network. You can query the list of nodes using the following code:
+
 ```python
->>> from pprint import pprint
->>> import zellular
->>> operators = zellular.get_operators()
->>> pprint(operators)
+from pprint import pprint
+import zellular
+
+operators = zellular.get_operators()
+pprint(operators)
+```
+Example output:
+
+```
 {'0x3eaa...078c': {
     'id': '0x3eaa...078c',
     'operatorId': '0xfd17...97fd',
@@ -45,31 +55,49 @@ pip install zellular
 }, ... }
 ```
 
-### Posting
+> [!TIP]
+> The node URL of each operator can be accessed using `operator["socket"]`.
+
+### Posting Transactions
+
+Zellular sequences transactions in batches. You can send a batch of transactions like this:
 
 ```python
->>> import requests
->>> import time
->>> base_url = "http://5.161.230.186:6001"
->>> app_name = "simple_app"
->>> t = int(time.time())
->>> txs = [{ "operation": "foo", "tx_id": str(uuid4()), "t": t } for i in range(5)]
->>> resp = requests.put(f"{base_url}/node/{app_name}/batches", json=txs)
->>> print(resp.status_code)
+import requests
+from uuid import uuid4
+import time
+
+base_url = "http://5.161.230.186:6001"
+app_name = "simple_app"
+t = int(time.time())
+
+txs = [{"operation": "foo", "tx_id": str(uuid4()), "t": t} for _ in range(5)]
+resp = requests.put(f"{base_url}/node/{app_name}/batches", json=txs)
+
+print(resp.status_code)
 ```
 
-### Fetching and Verifying
+### Fetching and Verifying Transactions
+
+Unlike reading from a traditional blockchain, where you must trust the node you're connected to, Zellular allows trustless reading of sequenced transactions. This is achieved through an aggregated BLS signature that verifies if the sequence of transaction batches is approved by the majority of Zellular nodes. The Zellular SDK abstracts the complexities of verifying these signatures, providing a simple way to constantly pull the latest finalized transaction batches:
 
 ```python
-{"data":{},"message":"The batch is received successfully.","status":"success"}
->>> import json
->>> import zellular
->>> verifier = zellular.Verifier("simple_app", "http://5.161.230.186:6001")
->>> for batch, index in verifier.batches():
-...     txs = json.loads(batch)
-...     for i, tx in enumerate(txs):
-...         print(index, i, tx)
+import json
+import zellular
 
+verifier = zellular.Verifier("simple_app", "http://5.161.230.186:6001")
+
+for batch, index in verifier.batches():
+    txs = json.loads(batch)
+    for i, tx in enumerate(txs):
+        print(index, i, tx)
+
+app: simple_app, index: 481238, result: True
+app: simple_app, index: 481240, result: True
+```
+Example output:
+
+```
 app: simple_app, index: 481238, result: True
 app: simple_app, index: 481240, result: True
 583 0 {'tx_id': '7eaa...2101', 'operation': 'foo', 't': 1725363009}

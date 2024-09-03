@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="zellular",
-    version="0.1.0",
+    version="0.1.3",
     author="Abram Symons",
     author_email="abramsymons@gmail.com",
     description="a package sdk for zelluar",
@@ -18,7 +18,7 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        "eigensdk @ git+https://github.com/zellular-xyz/eigensdk-python.git@main#egg=eigensdk",
+        "eigensdk",
         "requests",
         "xxhash"
     ],

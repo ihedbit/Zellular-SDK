@@ -53,13 +53,13 @@ def get_operators():
 
 
 class Verifier:
-    def __init__(self, app_name, base_url, operators):
+    def __init__(self, app_name, base_url):
         self.threshold_percent = 40
         self.app_name = app_name
         self.base_url = base_url
-        self.operators = operators
+        self.operators = get_operators()
         self.aggregated_public_key = attestation.new_zero_g2_point()
-        for operator in operators.values():
+        for operator in self.operators.values():
             self.aggregated_public_key += operator["public_key_g2"]
 
     def verify_signature(self, message, signature_hex, nonsigners):
@@ -108,6 +108,9 @@ class Verifier:
 
     def get_finalized_after(self, index, chaining_hash):
         data = self.get_last_finalized()
+        if data["index"] <= index:
+            return chaining_hash, []
+
         checked_batches = []
         while True:
             resp = requests.get(
@@ -141,7 +144,7 @@ if __name__ == "__main__":
     operators = get_operators()
     base_url = random.choice(list(operators.values()))["socket"]
     print(base_url)
-    verifier = Verifier("simple_app", base_url, operators)
+    verifier = Verifier("simple_app", base_url)
     for batch, index in verifier.batches():
         txs = json.loads(batch)
         for i, tx in enumerate(txs):

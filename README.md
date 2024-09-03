@@ -91,9 +91,6 @@ for batch, index in verifier.batches():
     txs = json.loads(batch)
     for i, tx in enumerate(txs):
         print(index, i, tx)
-
-app: simple_app, index: 481238, result: True
-app: simple_app, index: 481240, result: True
 ```
 Example output:
 

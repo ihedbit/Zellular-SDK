@@ -25,7 +25,7 @@ pip install zellular
 
 ## Example
 
-### Getting list of nodes
+### Getting Nodes
 
 ```python
 >>> from pprint import pprint
@@ -47,10 +47,21 @@ pip install zellular
 
 ### Posting
 
+```python
+>>> import requests
+>>> import time
+>>> base_url = "http://5.161.230.186:6001"
+>>> app_name = "simple_app"
+>>> t = int(time.time())
+>>> txs = [{ "operation": "foo", "tx_id": str(uuid4()), "t": t } for i in range(5)]
+>>> resp = requests.put(f"{base_url}/node/{app_name}/batches", json=txs)
+>>> print(resp.status_code)
+```
 
-### Fetching & Verifying
+### Fetching and Verifying
 
 ```python
+{"data":{},"message":"The batch is received successfully.","status":"success"}
 >>> import json
 >>> import zellular
 >>> verifier = zellular.Verifier("simple_app", "http://5.161.230.186:6001")
@@ -59,12 +70,12 @@ pip install zellular
 ...     for i, tx in enumerate(txs):
 ...         print(index, i, tx)
 
-app: simple_app, index: 481237, result: True
-app: simple_app, index: 481238, result: True
-481237 0 {'tx_id': '391e...f4c9', 'operation': 'foo', 't': 1725351862}
 app: simple_app, index: 481238, result: True
 app: simple_app, index: 481240, result: True
-481238 0 {'tx_id': '96df...0452', 'operation': 'foo', 't': 1725351863}
-481239 0 {'tx_id': '95ac...ef2e', 'operation': 'foo', 't': 1725351863}
+583 0 {'tx_id': '7eaa...2101', 'operation': 'foo', 't': 1725363009}
+583 1 {'tx_id': '5839...6f5e', 'operation': 'foo', 't': 1725363009}
+583 2 {'tx_id': '0a1a...05cb', 'operation': 'foo', 't': 1725363009}
+583 3 {'tx_id': '6339...cc08', 'operation': 'foo', 't': 1725363009}
+583 4 {'tx_id': 'cf4a...fc19', 'operation': 'foo', 't': 1725363009}
 ...
 ```

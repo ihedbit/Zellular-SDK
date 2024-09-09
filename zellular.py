@@ -103,7 +103,7 @@ class Verifier:
             nonsigners,
         )
         assert result, "last finalized verification failed"
-        print(f"app: {data['app_name']}, index: {data["index"]}, result: {result}")
+        print(f"app: {data['app_name']}, index: {data['index']}, verification result: {result}")
         return data
 
     def get_finalized_after(self, index, chaining_hash):

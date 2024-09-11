@@ -77,6 +77,11 @@ resp = requests.put(f"{base_url}/node/{app_name}/batches", json=txs)
 print(resp.status_code)
 ```
 
+> [!TIP]
+> You can add your app to zellular test network using:
+> `curl -X POST https://www.zellular.xyz/testnet/apps -H "Content-Type: application/json" -d '{"app_name": "your-app-name"}'`
+
+
 ### Fetching and Verifying Transactions
 
 Unlike reading from a traditional blockchain, where you must trust the node you're connected to, Zellular allows trustless reading of sequenced transactions. This is achieved through an aggregated BLS signature that verifies if the sequence of transaction batches is approved by the majority of Zellular nodes. The Zellular SDK abstracts the complexities of verifying these signatures, providing a simple way to constantly pull the latest finalized transaction batches:

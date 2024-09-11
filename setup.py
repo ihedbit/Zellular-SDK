@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="zellular",
-    version="0.1.3",
+    version="0.1.4",
     author="Abram Symons",
     author_email="abramsymons@gmail.com",
     description="a package sdk for zelluar",

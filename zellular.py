@@ -79,18 +79,14 @@ class Verifier:
         message = hash(message)
         return signature.verify(public_key, message.encode("utf-8"))
 
-    def get_last_finalized(self):
-        resp = requests.get(
-            f"{self.base_url}/node/{self.app_name}/batches/finalized/last"
-        )
-        data = resp.json()["data"]
+    def verify_finalized(self, data, batch_hash, chaining_hash):
         message = json.dumps(
             {
-                "app_name": data["app_name"],
+                "app_name": self.app_name,
                 "state": "locked",
                 "index": data["index"],
-                "hash": data["hash"],
-                "chaining_hash": data["chaining_hash"],
+                "hash": batch_hash,
+                "chaining_hash": chaining_hash,
             },
             sort_keys=True,
         )
@@ -102,42 +98,44 @@ class Verifier:
             signature,
             nonsigners,
         )
-        assert result, "last finalized verification failed"
-        print(f"app: {data['app_name']}, index: {data['index']}, verification result: {result}")
-        return data
+        print(f"app: {self.app_name}, index: {data['index']}, verification result: {result}")
+        return result
 
-    def get_finalized_after(self, index, chaining_hash):
-        data = self.get_last_finalized()
-        if data["index"] <= index:
-            return chaining_hash, []
-
-        checked_batches = []
+    def get_finalized(self, after, chaining_hash):
+        res = []
+        index = after if chaining_hash != None else after - 1
         while True:
             resp = requests.get(
                 f"{self.base_url}/node/{self.app_name}/batches/finalized?after={index}"
             )
-            batches = resp.json()["data"]
+            data = resp.json()["data"]
+            if not data:
+                continue
+            batches = data["batches"]
+            finalized = data["finalized"]
+            if chaining_hash == None:
+                chaining_hash = data["first_chaining_hash"]
+                batches = batches[1:]
+                index += 1
+
             for batch in batches:
                 index += 1
                 chaining_hash = hash(chaining_hash + hash(batch))
-                checked_batches.append(batch)
-                if index == data["index"]:
+                res.append(batch)
+                if finalized and index == finalized["index"]:
                     assert (
-                        chaining_hash == data["chaining_hash"]
-                    ), "invalid chaining_hash"
-                    return chaining_hash, checked_batches
+                        self.verify_finalized(finalized, hash(batch), chaining_hash)
+                    ), "invalid signature"
+                    return chaining_hash, res
 
-    def batches(self):
-        # todo: support custom index to start with
-        base_data = self.get_last_finalized()
-        index = base_data["index"]
-        chaining_hash = base_data["chaining_hash"]
-
+    def batches(self, after=0):
+        assert after >= 0, "after should be equal or bigger than 0"
+        chaining_hash = "" if after == 0 else None
         while True:
-            chaining_hash, batches = self.get_finalized_after(index, chaining_hash)
+            chaining_hash, batches = self.get_finalized(after, chaining_hash)
             for batch in batches:
-                yield batch, index
-                index += 1
+                after += 1
+                yield batch, after
 
 
 if __name__ == "__main__":

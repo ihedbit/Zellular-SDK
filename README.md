@@ -92,7 +92,7 @@ import zellular
 
 verifier = zellular.Verifier("simple_app", "http://5.161.230.186:6001")
 
-for batch, index in verifier.batches():
+for batch, index in verifier.batches(after=0):
     txs = json.loads(batch)
     for i, tx in enumerate(txs):
         print(index, i, tx)
@@ -100,8 +100,8 @@ for batch, index in verifier.batches():
 Example output:
 
 ```
-app: simple_app, index: 481238, result: True
-app: simple_app, index: 481240, result: True
+app: simple_app, index: 1, result: True
+app: simple_app, index: 2, result: True
 583 0 {'tx_id': '7eaa...2101', 'operation': 'foo', 't': 1725363009}
 583 1 {'tx_id': '5839...6f5e', 'operation': 'foo', 't': 1725363009}
 583 2 {'tx_id': '0a1a...05cb', 'operation': 'foo', 't': 1725363009}

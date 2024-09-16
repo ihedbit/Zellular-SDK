@@ -116,9 +116,6 @@ app: simple_app, index: 2, result: True
 If you want to start reading batches from the latest finalized batch rather than from the beginning, you can achieve this by specifying the `after` parameter with the latest index. Here’s an example of how to do this:
 
 ```python
-base_url = "http://5.161.230.186:6001"
-app_name = "simple_app"
-
 resp = requests.get(f"{base_url}/node/{app_name}/batches/finalized/last")
 index = resp.json()['data']['index']
 for batch, index in verifier.batches(after=index):

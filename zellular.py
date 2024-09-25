@@ -52,7 +52,7 @@ def get_operators():
     return operators
 
 
-class Verifier:
+class Zellular:
     def __init__(self, app_name, base_url, threshold_percent=67):
         self.app_name = app_name
         self.base_url = base_url
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     operators = get_operators()
     base_url = random.choice(list(operators.values()))["socket"]
     print(base_url)
-    verifier = Verifier("simple_app", base_url)
+    verifier = Zellular("simple_app", base_url)
     for batch, index in verifier.batches():
         txs = json.loads(batch)
         for i, tx in enumerate(txs):

@@ -66,16 +66,17 @@ Zellular sequences transactions in batches. You can send a batch of transactions
 import requests
 from uuid import uuid4
 import time
+from zellular import Zellular
 
 base_url = "http://5.161.230.186:6001"
 app_name = "simple_app"
 
-verifier = zellular.Verifier(app_name, base_url)
+zellular = Zellular(app_name, base_url)
 
 t = int(time.time())
 txs = [{"operation": "foo", "tx_id": str(uuid4()), "t": t} for _ in range(5)]
 
-index = verifier.send(txs, blocking=True)
+index = zellular.send(txs, blocking=True)
 ```
 
 When setting `blocking=True`, the method waits for the batch to be sequenced and returns the index.
@@ -91,14 +92,14 @@ Unlike reading from a traditional blockchain, where you must trust the node you'
 
 ```python
 import json
-import zellular
+from zellular import Zellular
 
 base_url = "http://5.161.230.186:6001"
 app_name = "simple_app"
 
-verifier = zellular.Verifier(app_name, base_url)
+zellular = Zellular(app_name, base_url)
 
-for batch, index in verifier.batches(after=0):
+for batch, index in zellular.batches(after=0):
     txs = json.loads(batch)
     for i, tx in enumerate(txs):
         print(index, i, tx)
@@ -121,6 +122,6 @@ If you want to start reading batches from the latest finalized batch rather than
 ```python
 resp = requests.get(f"{base_url}/node/{app_name}/batches/finalized/last")
 index = resp.json()['data']['index']
-for batch, index in verifier.batches(after=index):
+for batch, index in zellular.batches(after=index):
     ...
 ```

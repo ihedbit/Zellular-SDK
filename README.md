@@ -69,13 +69,16 @@ import time
 
 base_url = "http://5.161.230.186:6001"
 app_name = "simple_app"
+
+verifier = zellular.Verifier(app_name, base_url)
+
 t = int(time.time())
-
 txs = [{"operation": "foo", "tx_id": str(uuid4()), "t": t} for _ in range(5)]
-resp = requests.put(f"{base_url}/node/{app_name}/batches", json=txs)
 
-print(resp.status_code)
+index = verifier.send(txs, blocking=True)
 ```
+
+When setting `blocking=True`, the method waits for the batch to be sequenced and returns the index.
 
 > [!TIP]
 > You can add your app to zellular test network using:

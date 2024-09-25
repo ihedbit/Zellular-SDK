@@ -53,10 +53,10 @@ def get_operators():
 
 
 class Verifier:
-    def __init__(self, app_name, base_url):
-        self.threshold_percent = 40
+    def __init__(self, app_name, base_url, threshold_percent=67):
         self.app_name = app_name
         self.base_url = base_url
+        self.threshold_percent = threshold_percent
         self.operators = get_operators()
         self.aggregated_public_key = attestation.new_zero_g2_point()
         for operator in self.operators.values():
@@ -137,6 +137,29 @@ class Verifier:
                 after += 1
                 yield batch, after
 
+    def get_last_finalized(self):
+        url = f"{self.base_url}/node/{self.app_name}/batches/finalized/last"
+        resp = requests.get(url)
+        data = resp.json()["data"]
+        verified = self.verify_finalized(data, data["hash"], data["chaining_hash"])
+        assert verified, "invalid signature"
+        return data
+
+    def send(self, batch, blocking=True):
+        if blocking:
+            index = self.get_last_finalized()["index"]
+
+        url = f"{self.base_url}/node/{self.app_name}/batches"
+        resp = requests.put(url, json=batch)
+        assert resp.status_code == 200
+
+        if not blocking:
+            return
+
+        for received_batch, index in self.batches(after=index):
+            received_batch = json.loads(received_batch)
+            if batch == received_batch:
+                return index
 
 if __name__ == "__main__":
     operators = get_operators()

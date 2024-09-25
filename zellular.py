@@ -145,7 +145,7 @@ class Verifier:
         assert verified, "invalid signature"
         return data
 
-    def send(self, batch, blocking=True):
+    def send(self, batch, blocking=False):
         if blocking:
             index = self.get_last_finalized()["index"]
 

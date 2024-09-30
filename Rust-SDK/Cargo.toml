@@ -1,0 +1,7 @@
+[dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.9"
+bls12_381 = "0.3" # Placeholder for the BLS12-381 library
+tokio = { version = "1", features = ["full"] }
